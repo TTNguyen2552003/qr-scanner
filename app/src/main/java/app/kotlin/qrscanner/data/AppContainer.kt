@@ -3,11 +3,9 @@ package app.kotlin.qrscanner.data
 import android.content.Context
 
 interface AppContainer {
-    val qrScannerRepository: QRScannerRepository
+    val qrScannerRepository: BackgroundWorkQRScannerRepository
 }
 
-class DefaultAppContainer(
-    context: Context
-) : AppContainer {
+class DefaultAppContainer(context: Context) : AppContainer {
     override val qrScannerRepository = WorkManagerQRScannerRepository(context = context)
 }

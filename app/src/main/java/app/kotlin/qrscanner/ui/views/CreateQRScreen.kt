@@ -20,6 +20,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,16 +30,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.kotlin.qrscanner.ui.theme.notScale
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
+import app.kotlin.qrscanner.ui.viewmodels.CreateQRUiState
+import app.kotlin.qrscanner.ui.viewmodels.CreateQRViewModel
 
 @Composable
 fun CreateQRScreen(
-
+    createQRViewModel: CreateQRViewModel = viewModel(factory = CreateQRViewModel.factory)
 ) {
-
+    val createQRUiState: State<CreateQRUiState> = createQRViewModel
+        .uiState
+        .collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         @Composable
@@ -53,18 +57,14 @@ fun CreateQRScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(space = 40.dp)
             ) {
-                var textInput: String by remember {
-                    mutableStateOf(value = "")
-                }
 
                 var bitmap: Bitmap? by remember {
                     mutableStateOf(value = null)
                 }
                 TextField(
-                    value = textInput,
+                    value = createQRUiState.value.textInput,
                     onValueChange = {
-                        textInput = it
-                        bitmap = generateQRCode(text = textInput)
+                        createQRViewModel.updateTextInput(newValue = it)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     textStyle = MaterialTheme
@@ -81,11 +81,9 @@ fun CreateQRScreen(
                         )
                     },
                     trailingIcon = {
-                        if (textInput.isNotEmpty())
+                        if (createQRUiState.value.textInput.isNotEmpty())
                             IconButton(
-                                onClick = {
-                                    textInput = ""
-                                }
+                                onClick = { createQRViewModel.updateTextInput(newValue = "") }
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Clear,
@@ -102,7 +100,7 @@ fun CreateQRScreen(
                         modifier = Modifier.wrapContentHeight(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        bitmap?.let {
+                        createQRUiState.value.qrCodeResult?.let {
                             Image(
                                 bitmap = it.asImageBitmap(),
                                 contentDescription = "Generated QR Code",
@@ -111,7 +109,7 @@ fun CreateQRScreen(
                                     .height(height = 256.dp)
                             )
 
-                            Button(onClick = { }) {
+                            Button(onClick = { createQRViewModel.saveQRCode() }) {
                                 Text(
                                     text = "Save"
                                 )
@@ -124,38 +122,4 @@ fun CreateQRScreen(
         }
         ContextWrapper()
     }
-}
-
-fun generateQRCode(text: String): Bitmap? {
-    if (text == "")
-        return null
-
-    val width = 256
-    val height = 256
-
-    val bitMatrix: BitMatrix =
-        MultiFormatWriter()
-            .encode(
-                text,
-                BarcodeFormat.QR_CODE,
-                width,
-                height
-            )
-
-    val bitmap: Bitmap = Bitmap.createBitmap(
-        width,
-        height,
-        Bitmap.Config.RGB_565
-    )
-
-    for (x: Int in 0 until width) {
-        for (y: Int in 0 until height) {
-            bitmap.setPixel(
-                x,
-                y,
-                if (bitMatrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE
-            )
-        }
-    }
-    return bitmap
 }
