@@ -5,6 +5,7 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import app.kotlin.qrscanner.KEY_TEXT_INPUT
 import app.kotlin.qrscanner.workers.SaveQRCodeWorker
 
 interface BackgroundWorkQRScannerRepository {
@@ -16,7 +17,7 @@ class WorkManagerQRScannerRepository(context: Context) : BackgroundWorkQRScanner
     private val workManager: WorkManager = WorkManager.getInstance(context)
     override fun saveQRCode(textInput: String) {
         val dataBuilder = Data.Builder()
-        dataBuilder.putString("text_input", textInput)
+        dataBuilder.putString(KEY_TEXT_INPUT, textInput)
 
         val saveQrCodeRequestBuilder: OneTimeWorkRequest.Builder =
             OneTimeWorkRequestBuilder<SaveQRCodeWorker>()

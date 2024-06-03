@@ -20,6 +20,7 @@ import androidx.work.WorkerParameters
 import app.kotlin.qrscanner.CHANNEL_DESCRIPTION
 import app.kotlin.qrscanner.CHANNEL_ID
 import app.kotlin.qrscanner.CHANNEL_NAME
+import app.kotlin.qrscanner.KEY_TEXT_INPUT
 import app.kotlin.qrscanner.NOTIFICATION_BODY_FAILED
 import app.kotlin.qrscanner.NOTIFICATION_BODY_PROCESS
 import app.kotlin.qrscanner.NOTIFICATION_BODY_SUCCESS
@@ -54,7 +55,7 @@ class SaveQRCodeWorker(appContext: Context, params: WorkerParameters) : Coroutin
                     context = applicationContext
                 )
 
-                val decodedString: String = inputData.getString("text_input") ?: ""
+                val decodedString: String = inputData.getString(KEY_TEXT_INPUT) ?: ""
                 val qrCode: Bitmap = generateQRCode(text = decodedString) ?: throw Throwable()
                 val title = "qr_code_${LocalDateTime.now()}"
                 if (saveBitmapToMediaStore(applicationContext, qrCode, title)) {

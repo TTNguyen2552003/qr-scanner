@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import app.kotlin.qrscanner.ui.MainScreen
 import app.kotlin.qrscanner.ui.theme.QRScannerTheme
+import app.kotlin.qrscanner.ui.views.BarCodeScanner
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,7 +14,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QRScannerTheme {
-                MainScreen()
+               MainScreen()
             }
         }
     }

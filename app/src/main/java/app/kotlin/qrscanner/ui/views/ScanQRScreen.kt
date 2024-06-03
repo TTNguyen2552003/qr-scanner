@@ -15,6 +15,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,12 +26,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.kotlin.qrscanner.R
 import app.kotlin.qrscanner.ui.theme.notScale
+import app.kotlin.qrscanner.ui.viewmodels.ScanQRUiState
+import app.kotlin.qrscanner.ui.viewmodels.ScanQRViewModel
 
 @Preview
 @Composable
-fun ScanQRScreen() {
+fun ScanQRScreen(
+    scanQRViewModel: ScanQRViewModel = viewModel(factory = ScanQRViewModel.factory)
+) {
+    val scanQRUiState: State<ScanQRUiState> = scanQRViewModel.uiState.collectAsState()
+
     Box(modifier = Modifier.fillMaxSize()) {
         @Composable
         fun ContextWrapper() {
@@ -55,7 +64,7 @@ fun ScanQRScreen() {
                             contentDescription = ""
                         )
 
-                        Button(onClick = { /*TODO*/ }) {
+                        Button(onClick = { scanQRViewModel.scanQRCode() }) {
                             Text(
                                 text = "Scan",
                                 style = MaterialTheme
@@ -68,11 +77,10 @@ fun ScanQRScreen() {
                 }
                 CTAContainer()
 
-                var textFieldValue: String by remember {
-                    mutableStateOf(value = "")
-                }
+
+
                 TextField(
-                    value = textFieldValue,
+                    value = scanQRUiState.value.barcodeResult,
                     onValueChange = { },
                     readOnly = true,
                     singleLine = true,
@@ -129,22 +137,16 @@ fun ScanQRScreen() {
                             }
                         }
 
-                        var enableOption1: Boolean by remember {
-                            mutableStateOf(value = false)
-                        }
                         Option(
                             title = "Automatically copy to the clipboard",
-                            enable = enableOption1,
-                            onChangeSwitch = { enableOption1 = !enableOption1 }
+                            enable = scanQRUiState.value.autoCopy,
+                            onChangeSwitch = { scanQRViewModel.updateAutoCopyState() }
                         )
 
-                        var enableOption2: Boolean by remember {
-                            mutableStateOf(value = false)
-                        }
                         Option(
                             title = "Automatically open the web link",
-                            enable = enableOption2,
-                            onChangeSwitch = { enableOption2 = !enableOption2 }
+                            enable = scanQRUiState.value.autoOpenWeblink,
+                            onChangeSwitch = { scanQRViewModel.updateAutoOpenWebState() }
                         )
                     }
                 }

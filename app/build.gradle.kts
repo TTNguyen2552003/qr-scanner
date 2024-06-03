@@ -62,7 +62,14 @@ dependencies {
 
     val lifecycleVersion = "2.8.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    // Lifecycle utilities for Compose
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
 
+    val codeScannerVersion = "16.1.0"
+    implementation ("com.google.android.gms:play-services-code-scanner:$codeScannerVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
+    
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
