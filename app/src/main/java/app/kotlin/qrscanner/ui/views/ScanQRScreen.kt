@@ -1,5 +1,13 @@
 package app.kotlin.qrscanner.ui.views
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Context.CLIPBOARD_SERVICE
+import android.content.Intent
+import android.net.Uri
+import android.webkit.URLUtil
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,14 +23,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,6 +44,30 @@ fun ScanQRScreen(
     scanQRViewModel: ScanQRViewModel = viewModel(factory = ScanQRViewModel.factory)
 ) {
     val scanQRUiState: State<ScanQRUiState> = scanQRViewModel.uiState.collectAsState()
+
+    val context: Context = LocalContext.current
+    LaunchedEffect(key1 = scanQRUiState.value.barcodeResult) {
+        if (scanQRUiState.value.autoCopy) {
+            val clipBoardManager: ClipboardManager = context
+                .getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+
+            val clip: ClipData = ClipData.newPlainText(
+                "qr code with auto copy",
+                scanQRUiState.value.barcodeResult
+            )
+
+            clipBoardManager.setPrimaryClip(clip)
+
+            Toast.makeText(context, "QR code copied to clip board", Toast.LENGTH_LONG).show()
+        }
+
+        if (scanQRUiState.value.autoOpenWeblink) {
+            if (URLUtil.isHttpsUrl(scanQRUiState.value.barcodeResult)){
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(scanQRUiState.value.barcodeResult))
+                context.startActivity(intent)
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         @Composable
@@ -77,11 +107,9 @@ fun ScanQRScreen(
                 }
                 CTAContainer()
 
-
-
                 TextField(
                     value = scanQRUiState.value.barcodeResult,
-                    onValueChange = { },
+                    onValueChange = {},
                     readOnly = true,
                     singleLine = true,
                     label = {
