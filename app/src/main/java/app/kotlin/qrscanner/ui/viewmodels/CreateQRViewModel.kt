@@ -60,6 +60,7 @@ class CreateQRViewModel(
         }
 
         debounceJob?.cancel()
+
         debounceJob = viewModelScope.launch {
             delay(debounceDelay)
             updateQRCodeResult(textInput = _uiState.value.textInput)
@@ -72,7 +73,7 @@ class CreateQRViewModel(
         backgroundWorkQRScannerRepository.saveQRCode(textInput = currentTextInput)
     }
 
-    private fun resetState(){
+    private fun resetState() {
         _uiState.value = CreateQRUiState()
     }
 

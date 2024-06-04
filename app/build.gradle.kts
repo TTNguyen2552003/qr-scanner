@@ -55,21 +55,24 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$navVersion")
 
     val zxingCoreVersion = "3.5.3"
-    implementation ("com.google.zxing:core:$zxingCoreVersion")
+    implementation("com.google.zxing:core:$zxingCoreVersion")
 
     val workVersion = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")
 
     val lifecycleVersion = "2.8.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
-    // Lifecycle utilities for Compose
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
 
     val codeScannerVersion = "16.1.0"
-    implementation ("com.google.android.gms:play-services-code-scanner:$codeScannerVersion")
+    implementation("com.google.android.gms:play-services-code-scanner:$codeScannerVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9")
-    
+    val barcodeScanningVersion = "17.2.0"
+    implementation("com.google.mlkit:barcode-scanning:$barcodeScanningVersion")
+
+    val coilVersion = "2.6.0"
+    implementation("io.coil-kt:coil-compose:$coilVersion")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

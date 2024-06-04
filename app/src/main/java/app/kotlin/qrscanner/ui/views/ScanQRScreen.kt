@@ -41,11 +41,12 @@ import app.kotlin.qrscanner.ui.viewmodels.ScanQRViewModel
 @Preview
 @Composable
 fun ScanQRScreen(
-    scanQRViewModel: ScanQRViewModel = viewModel(factory = ScanQRViewModel.factory)
+    scanQRViewModel: ScanQRViewModel = viewModel()
 ) {
     val scanQRUiState: State<ScanQRUiState> = scanQRViewModel.uiState.collectAsState()
 
     val context: Context = LocalContext.current
+
     LaunchedEffect(key1 = scanQRUiState.value.barcodeResult) {
         if (scanQRUiState.value.autoCopy) {
             val clipBoardManager: ClipboardManager = context
@@ -94,7 +95,7 @@ fun ScanQRScreen(
                             contentDescription = ""
                         )
 
-                        Button(onClick = { scanQRViewModel.scanQRCode() }) {
+                        Button(onClick = { scanQRViewModel.scanQRCode(context = context) }) {
                             Text(
                                 text = "Scan",
                                 style = MaterialTheme

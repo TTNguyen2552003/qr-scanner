@@ -2,14 +2,9 @@ package app.kotlin.qrscanner.ui.viewmodels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import app.kotlin.qrscanner.NOTIFICATION_BODY_FAILED_SCANNING
-import app.kotlin.qrscanner.NOTIFICATION_ID_FAILED_SCANNING
-import app.kotlin.qrscanner.NOTIFICATION_TITLE_FAILED_SCANNING
-import app.kotlin.qrscanner.QRScannerApplication
+import app.kotlin.qrscanner.NOTIFICATION_BODY_SCAN_FAILED
+import app.kotlin.qrscanner.NOTIFICATION_ID_SCAN_FAILED
+import app.kotlin.qrscanner.NOTIFICATION_TITLE_SCAN_FAILED
 import app.kotlin.qrscanner.workers.makeNotification
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
@@ -26,13 +21,13 @@ data class ScanQRUiState(
     val autoOpenWeblink: Boolean = false
 )
 
-class ScanQRViewModel(private val context: Context) : ViewModel() {
+class ScanQRViewModel : ViewModel() {
     private val _uiState: MutableStateFlow<ScanQRUiState> =
         MutableStateFlow(value = ScanQRUiState())
 
     val uiState: StateFlow<ScanQRUiState> = _uiState.asStateFlow()
 
-    private fun updateOutputText(newValue: String) {
+    private fun updateQRCodeResult(newValue: String) {
         _uiState.update { currentState ->
             currentState.copy(
                 barcodeResult = newValue
@@ -52,38 +47,28 @@ class ScanQRViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    private val options = GmsBarcodeScannerOptions
-        .Builder()
-        .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-        .enableAutoZoom()
-        .build()
-    private val scanner: GmsBarcodeScanner = GmsBarcodeScanning.getClient(context, options)
 
-    fun scanQRCode() {
+    fun scanQRCode(context: Context) {
+        val options:GmsBarcodeScannerOptions = GmsBarcodeScannerOptions
+            .Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .enableAutoZoom()
+            .build()
+        val scanner: GmsBarcodeScanner = GmsBarcodeScanning.getClient(context, options)
+
         scanner.startScan()
             .addOnSuccessListener { barcode ->
-                updateOutputText(newValue = barcode.rawValue ?: "")
+                updateQRCodeResult(newValue = "")
+                updateQRCodeResult(newValue = barcode.rawValue ?: "")
             }
             .addOnFailureListener {
-                updateOutputText(newValue = "")
+                updateQRCodeResult(newValue = "")
                 makeNotification(
-                    title = NOTIFICATION_TITLE_FAILED_SCANNING,
-                    body = NOTIFICATION_BODY_FAILED_SCANNING,
-                    notificationId = NOTIFICATION_ID_FAILED_SCANNING,
+                    title = NOTIFICATION_TITLE_SCAN_FAILED,
+                    body = NOTIFICATION_BODY_SCAN_FAILED,
+                    notificationId = NOTIFICATION_ID_SCAN_FAILED,
                     context = context
                 )
             }
-    }
-
-    companion object {
-        val factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application: QRScannerApplication =
-                    (this[APPLICATION_KEY] as QRScannerApplication)
-                ScanQRViewModel(
-                    context = application.applicationContext
-                )
-            }
-        }
     }
 }

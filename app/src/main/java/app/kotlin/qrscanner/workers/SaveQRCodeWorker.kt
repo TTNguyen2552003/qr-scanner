@@ -21,15 +21,15 @@ import app.kotlin.qrscanner.CHANNEL_DESCRIPTION
 import app.kotlin.qrscanner.CHANNEL_ID
 import app.kotlin.qrscanner.CHANNEL_NAME
 import app.kotlin.qrscanner.KEY_TEXT_INPUT
-import app.kotlin.qrscanner.NOTIFICATION_BODY_FAILED
-import app.kotlin.qrscanner.NOTIFICATION_BODY_PROCESS
-import app.kotlin.qrscanner.NOTIFICATION_BODY_SUCCESS
-import app.kotlin.qrscanner.NOTIFICATION_ID_FAILED
-import app.kotlin.qrscanner.NOTIFICATION_ID_PROCESS
-import app.kotlin.qrscanner.NOTIFICATION_ID_SUCCESS
-import app.kotlin.qrscanner.NOTIFICATION_TITLE_FAILED
-import app.kotlin.qrscanner.NOTIFICATION_TITLE_PROCESS
-import app.kotlin.qrscanner.NOTIFICATION_TITLE_SUCCESS
+import app.kotlin.qrscanner.NOTIFICATION_BODY_SAVE_FAILED
+import app.kotlin.qrscanner.NOTIFICATION_BODY_SAVE_SUCCESSFULLY
+import app.kotlin.qrscanner.NOTIFICATION_BODY_SAVING_QR_CODE
+import app.kotlin.qrscanner.NOTIFICATION_ID_SAVE_FAILED
+import app.kotlin.qrscanner.NOTIFICATION_ID_SAVE_SUCCESSFULLY
+import app.kotlin.qrscanner.NOTIFICATION_ID_SAVING_QR_CODE
+import app.kotlin.qrscanner.NOTIFICATION_TITLE_SAVE_FAILED
+import app.kotlin.qrscanner.NOTIFICATION_TITLE_SAVE_SUCCESSFULLY
+import app.kotlin.qrscanner.NOTIFICATION_TITLE_SAVING_QR_CODE
 import app.kotlin.qrscanner.R
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -49,9 +49,9 @@ class SaveQRCodeWorker(appContext: Context, params: WorkerParameters) : Coroutin
         return withContext(Dispatchers.IO) {
             try {
                 makeNotification(
-                    title = NOTIFICATION_TITLE_PROCESS,
-                    body = NOTIFICATION_BODY_PROCESS,
-                    notificationId = NOTIFICATION_ID_PROCESS,
+                    title = NOTIFICATION_TITLE_SAVING_QR_CODE,
+                    body = NOTIFICATION_BODY_SAVING_QR_CODE,
+                    notificationId = NOTIFICATION_ID_SAVING_QR_CODE,
                     context = applicationContext
                 )
 
@@ -59,12 +59,12 @@ class SaveQRCodeWorker(appContext: Context, params: WorkerParameters) : Coroutin
                 val qrCode: Bitmap = generateQRCode(text = decodedString) ?: throw Throwable()
                 val title = "qr_code_${LocalDateTime.now()}"
                 if (saveBitmapToMediaStore(applicationContext, qrCode, title)) {
-                    notificationManager.cancel(NOTIFICATION_ID_PROCESS)
+                    notificationManager.cancel(NOTIFICATION_ID_SAVING_QR_CODE)
 
                     makeNotification(
-                        title = NOTIFICATION_TITLE_SUCCESS,
-                        body = NOTIFICATION_BODY_SUCCESS,
-                        notificationId = NOTIFICATION_ID_SUCCESS,
+                        title = NOTIFICATION_TITLE_SAVE_SUCCESSFULLY,
+                        body = NOTIFICATION_BODY_SAVE_SUCCESSFULLY,
+                        notificationId = NOTIFICATION_ID_SAVE_SUCCESSFULLY,
                         context = applicationContext
                     )
                     return@withContext Result.success()
@@ -74,9 +74,9 @@ class SaveQRCodeWorker(appContext: Context, params: WorkerParameters) : Coroutin
 
             } catch (e: Throwable) {
                 makeNotification(
-                    title = NOTIFICATION_TITLE_FAILED,
-                    body = NOTIFICATION_BODY_FAILED,
-                    notificationId = NOTIFICATION_ID_FAILED,
+                    title = NOTIFICATION_TITLE_SAVE_FAILED,
+                    body = NOTIFICATION_BODY_SAVE_FAILED,
+                    notificationId = NOTIFICATION_ID_SAVE_FAILED,
                     context = applicationContext
                 )
 
@@ -108,7 +108,7 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
             R.drawable.notification_icon
         )
 
-    val intent = Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+    val intent = Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
     val pendingIntent: PendingIntent = PendingIntent
         .getActivity(
             context,
@@ -129,7 +129,7 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
         .setAutoCancel(true)
         .setColor(Color.BLACK)
 
-    if (notificationId == NOTIFICATION_ID_SUCCESS)
+    if (notificationId == NOTIFICATION_ID_SAVE_SUCCESSFULLY)
         notificationBuilder.setContentIntent(pendingIntent)
 
     NotificationManagerCompat.from(context).notify(notificationId, notificationBuilder.build())
