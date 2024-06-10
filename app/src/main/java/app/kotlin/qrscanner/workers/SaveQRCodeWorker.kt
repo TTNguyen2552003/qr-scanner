@@ -11,6 +11,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.media.AudioAttributes
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.core.app.NotificationCompat
@@ -91,22 +92,30 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
     val description: String = CHANNEL_DESCRIPTION
     val importance: Int = NotificationManager.IMPORTANCE_HIGH
     val channelId: String = CHANNEL_ID
+    val largeIcon: Bitmap? = BitmapFactory
+        .decodeResource(
+            context.resources,
+            R.drawable.ic_launcher_foreground
+        )
+    val soundUri: Uri = Uri
+        .parse("android.resource://${context.packageName}/raw/scanner_notification_sound")
+    val audioAttributes: AudioAttributes = AudioAttributes.Builder()
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+        .build()
+
     val channel = NotificationChannel(
         channelId,
         name,
         importance
     )
     channel.description = description
+    channel.setSound(soundUri, audioAttributes)
 
     val notificationManager: NotificationManager = context
         .getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.createNotificationChannel(channel)
 
-    val largeIcon: Bitmap? = BitmapFactory
-        .decodeResource(
-            context.resources,
-            R.drawable.ic_launcher_foreground
-        )
 
     val intent = Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
     val pendingIntent: PendingIntent = PendingIntent
@@ -116,13 +125,14 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
             intent,
             PendingIntent.FLAG_IMMUTABLE
         )
+
     val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(
         context,
         channelId
     )
         .setSmallIcon(R.drawable.ic_launcher_foreground)
         .setLargeIcon(largeIcon)
-        .setVibrate(LongArray(size = 0))
+        .setVibrate(longArrayOf(0, 1000, 500, 1000))
         .setContentTitle(title)
         .setContentText(body)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -176,8 +186,9 @@ fun saveBitmapToMediaStore(context: Context, bitmap: Bitmap, title: String): Boo
         put(MediaStore.Images.Media.IS_PENDING, 1)
     }
 
-    val contentResolver:ContentResolver = context.contentResolver
-    val uri: Uri? = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+    val contentResolver: ContentResolver = context.contentResolver
+    val uri: Uri? =
+        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
 
     if (uri != null) {
         var outputStream: OutputStream? = null

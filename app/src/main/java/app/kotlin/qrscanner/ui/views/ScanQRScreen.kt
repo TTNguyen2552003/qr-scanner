@@ -274,7 +274,11 @@ fun ScanQRScreen(scanQRViewModel: ScanQRViewModel = viewModel()) {
                             val goToAppSetting: () -> Unit = {
                                 val intent: Intent =
                                     Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                val uri: Uri = Uri.fromParts("package", context.packageName, null)
+                                val uri: Uri = Uri.fromParts(
+                                    "package",
+                                    context.packageName,
+                                    null
+                                )
                                 intent.setData(uri)
                                 context.startActivity(intent)
                             }
