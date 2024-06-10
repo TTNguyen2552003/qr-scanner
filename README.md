@@ -29,6 +29,12 @@ This app uses the following libraries:
 - Google ML Kit on Android
 
 ## Resource
-- Download the APK file [here]()
-- View my design on Behance [here]()
-- Prototype on Figma [here]()
+- Download the APK file [here](https://drive.usercontent.google.com/download?id=1bbWzpbyC4W8MU5nv4GD-y22jSFkjAmFZ&export=download&authuser=0&confirm=t&uuid=b3547074-572d-43ce-a159-eb6a169be965&at=APZUnTXEe5KQeipzfa1ErU-x9V4A:1718041311689)
+- View my design on Behance [here](https://www.behance.net/gallery/200698519/QR-SCANNER-APP)
+- Prototype on Figma [here](https://www.figma.com/proto/TqFtHVLEvvFdrLPPKc4qP2/QR-scanner?page-id=54795%3A26738&node-id=54802-595&viewport=1148%2C191%2C0.18&t=Ffb4cVOARzYtDXW3-1&scaling=min-zoom&starting-point-node-id=54802%3A640)
+
+## Screenshot
+<p align="center">
+  <img src="https://github.com/TTNguyen2552003/qr-scanner/blob/master/QR%20Scanner%20screenshot%201.gif" alt="screenshot 1" width="200"/>
+  <img src="https://github.com/TTNguyen2552003/qr-scanner/blob/master/QR%20Scanner%20screenshot%202.gif" alt="sceenshot 2" width="200"/>
+</p>
