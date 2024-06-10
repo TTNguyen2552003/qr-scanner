@@ -105,7 +105,7 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
     val largeIcon: Bitmap? = BitmapFactory
         .decodeResource(
             context.resources,
-            R.drawable.notification_icon
+            R.drawable.ic_launcher_foreground
         )
 
     val intent = Intent(Intent.ACTION_VIEW, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
@@ -120,7 +120,7 @@ fun makeNotification(title: String, body: String, notificationId: Int, context: 
         context,
         channelId
     )
-        .setSmallIcon(R.drawable.notification_icon)
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
         .setLargeIcon(largeIcon)
         .setVibrate(LongArray(size = 0))
         .setContentTitle(title)
@@ -202,4 +202,3 @@ fun saveBitmapToMediaStore(context: Context, bitmap: Bitmap, title: String): Boo
     }
     return false
 }
-

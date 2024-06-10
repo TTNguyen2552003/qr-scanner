@@ -1,110 +1,117 @@
 package app.kotlin.qrscanner.ui
 
-import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import app.kotlin.qrscanner.R
+import androidx.compose.ui.unit.dp
+import app.kotlin.qrscanner.ui.components.NavigationBar
 import app.kotlin.qrscanner.ui.views.CreateQRScreen
 import app.kotlin.qrscanner.ui.views.ReadImageScreen
 import app.kotlin.qrscanner.ui.views.ScanQRScreen
 
-
-data class BottomAppBarItem(
-    val index: Int = 0,
-    val label: String = "Label",
-    @DrawableRes val icon: Int,
-    val destination: String = "Unknown"
-)
-
 @Composable
 fun MainScreen() {
-    val bottomAppBarItems: List<BottomAppBarItem> = listOf(
-        BottomAppBarItem(
-            index = 0,
-            label = "Create",
-            icon = R.drawable.qr_code_create,
-            destination = "Create QR Screen"
-        ),
-        BottomAppBarItem(
-            index = 1,
-            label = "Scan",
-            icon = R.drawable.qr_code_scan,
-            destination = "Scan QR screen"
-        ),
-        BottomAppBarItem(
-            index = 2,
-            label = "Storage",
-            icon = R.drawable.storage
-        )
-    )
-
-
-    val navController: NavHostController = rememberNavController()
-
-    Scaffold(
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(insets = WindowInsets.statusBars),
-        bottomBar = {
+            .windowInsetsPadding(insets = WindowInsets.statusBars)
+            .padding(
+                top = 16.dp,
+                bottom = 28.dp
+            )
+    ) {
+        var selectedIndex: Int by remember {
+            mutableIntStateOf(value = 1)
+        }
 
-            var selected: Int by remember {
-                mutableIntStateOf(value = 1)
-            }
+        var previousIndex: Int by remember {
+            mutableIntStateOf(value = 1)
+        }
 
-            BottomAppBar {
-                bottomAppBarItems.forEach { it ->
-                    NavigationBarItem(
-                        selected = selected == it.index,
-                        onClick = {
-                            selected = it.index
-                            navController.navigate(route = it.destination) {
-                                popUpTo(id = 0)
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = it.icon),
-                                contentDescription = ""
+        val onPressNavigationBarItem: (Int) -> Unit = { index ->
+            previousIndex = selectedIndex
+            selectedIndex = index
+        }
+
+        @Composable
+        fun ContextWrapper() {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                AnimatedContent(
+                    targetState = selectedIndex,
+                    label = "navigation section",
+                    transitionSpec = {
+                        /***
+                         * if (previous selection < current selection) then push right else push left
+                         */
+
+                        if (previousIndex < selectedIndex)
+                            slideInHorizontally(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearEasing
+                                ),
+                                initialOffsetX = { it }
+                            ).togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearEasing
+                                    ),
+                                    targetOffsetX = { -it }
+                                )
                             )
-                        },
-                        label = { Text(text = it.label) }
-                    )
+                        else
+                            slideInHorizontally(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearEasing
+                                ),
+                                initialOffsetX = { -it }
+                            ).togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearEasing
+                                    ),
+                                    targetOffsetX = { it }
+                                )
+                            )
+                    }
+                ) { targetState ->
+                    when(targetState){
+                        0-> CreateQRScreen()
+                        1-> ScanQRScreen()
+                        else -> ReadImageScreen()
+                    }
                 }
             }
         }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = bottomAppBarItems[1].destination
-        ) {
-            composable(route = bottomAppBarItems[0].destination) {
-                CreateQRScreen()
-            }
-            composable(route = bottomAppBarItems[1].destination) {
-                ScanQRScreen()
-            }
-            composable(route = bottomAppBarItems[2].destination) {
-                ReadImageScreen()
-            }
-            innerPadding
-        }
+        ContextWrapper()
+
+        NavigationBar(
+            selectedIndex = selectedIndex,
+            onPress = onPressNavigationBarItem
+        )
     }
 }

@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">QR scanner</string>
+    <string name="section_label_create">Create</string>
+    <string name="section_label_scan">Scan</string>
+    <string name="section_label_storage">Storage</string>
+    <string name="text_field_input_place_holder">Enter your text</string>
+    <string name="qr_code_place_holder_text">QR code will appear here</string>
+    <string name="button_label_save">Save</string>
+    <string name="button_label_scan">Scan</string>
+    <string name="read_only_text_field_place_holder">Your result here</string>
+    <string name="options_context_title">Options</string>
+    <string name="option_description_auto_copy">Auto copy to clipboard</string>
+    <string name="option_description_auto_open_web_link">Auto open the web link</string>
+    <string name="button_label_load">Load</string>
+    <string name="button_label_allow">Allow</string>
+    <string name="explanation_for_access_photo_permission">You need to allow the app to \n access photos and medias</string>
+    <string name="button_label_setting">Setting</string>
+    <string name="button_label_ok">Ok</string>
+    <string name="button_label_cancel">Cancel</string>
+    <string name="explanation_for_notification_permission">Allow notification for better experience</string>
+    <string name="explanation_for_access_camera_permission">You need to allow the app to \n access the camera</string>
+    <string name="button_label_stop">Stop</string>
 </resources>

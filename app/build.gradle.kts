@@ -30,11 +30,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -50,10 +50,6 @@ android {
 }
 
 dependencies {
-
-    val navVersion = "2.7.7"
-    implementation("androidx.navigation:navigation-compose:$navVersion")
-
     val zxingCoreVersion = "3.5.3"
     implementation("com.google.zxing:core:$zxingCoreVersion")
 
@@ -64,14 +60,27 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
 
-    val codeScannerVersion = "16.1.0"
-    implementation("com.google.android.gms:play-services-code-scanner:$codeScannerVersion")
-
     val barcodeScanningVersion = "17.2.0"
     implementation("com.google.mlkit:barcode-scanning:$barcodeScanningVersion")
 
     val coilVersion = "2.6.0"
     implementation("io.coil-kt:coil-compose:$coilVersion")
+
+    val animatedVectorCompose = "1.0.0"
+    implementation("androidx.compose.animation:animation-graphics:$animatedVectorCompose")
+
+    val accompanistPermissionVersion = "0.35.1-alpha"
+    implementation("com.google.accompanist:accompanist-permissions:$accompanistPermissionVersion")
+
+    val splashScreenVersion = "1.0.0"
+    implementation("androidx.core:core-splashscreen:$splashScreenVersion")
+
+    val cameraxVersion = "1.4.0-beta01"
+    implementation("androidx.camera:camera-core:${cameraxVersion}")
+    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    implementation("androidx.camera:camera-view:${cameraxVersion}")
+    implementation("androidx.camera:camera-extensions:${cameraxVersion}")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

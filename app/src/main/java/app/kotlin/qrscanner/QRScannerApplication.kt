@@ -8,6 +8,6 @@ class QRScannerApplication : Application() {
     lateinit var container: AppContainer
     override fun onCreate() {
         super.onCreate()
-        container = DefaultAppContainer(context = this)
+        container = DefaultAppContainer(context = applicationContext)
     }
 }

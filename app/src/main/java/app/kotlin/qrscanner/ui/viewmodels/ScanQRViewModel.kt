@@ -1,15 +1,15 @@
 package app.kotlin.qrscanner.ui.viewmodels
 
-import android.content.Context
+import android.media.Image
+import androidx.annotation.OptIn
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
 import androidx.lifecycle.ViewModel
-import app.kotlin.qrscanner.NOTIFICATION_BODY_SCAN_FAILED
-import app.kotlin.qrscanner.NOTIFICATION_ID_SCAN_FAILED
-import app.kotlin.qrscanner.NOTIFICATION_TITLE_SCAN_FAILED
-import app.kotlin.qrscanner.workers.makeNotification
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanner
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
+import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,8 +17,10 @@ import kotlinx.coroutines.flow.update
 
 data class ScanQRUiState(
     val barcodeResult: String = "",
+    val keyScanningEvent: Boolean = false,
     val autoCopy: Boolean = false,
-    val autoOpenWeblink: Boolean = false
+    val autoOpenWeblink: Boolean = false,
+    val isScanning: Boolean = false
 )
 
 class ScanQRViewModel : ViewModel() {
@@ -27,11 +29,23 @@ class ScanQRViewModel : ViewModel() {
 
     val uiState: StateFlow<ScanQRUiState> = _uiState.asStateFlow()
 
-    private fun updateQRCodeResult(newValue: String) {
+    fun updateQRCodeResult(newValue: String) {
         _uiState.update { currentState ->
             currentState.copy(
                 barcodeResult = newValue
             )
+        }
+    }
+
+    fun startScanning() {
+        _uiState.update { currentState ->
+            currentState.copy(isScanning = true)
+        }
+    }
+
+    fun stopScanning() {
+        _uiState.update { currentState ->
+            currentState.copy(isScanning = false)
         }
     }
 
@@ -47,28 +61,49 @@ class ScanQRViewModel : ViewModel() {
         }
     }
 
+    fun recordScanningEvent() {
+        _uiState.update { currentState ->
+            currentState.copy(keyScanningEvent = !currentState.keyScanningEvent)
+        }
+    }
 
-    fun scanQRCode(context: Context) {
-        val options:GmsBarcodeScannerOptions = GmsBarcodeScannerOptions
-            .Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .enableAutoZoom()
-            .build()
-        val scanner: GmsBarcodeScanner = GmsBarcodeScanning.getClient(context, options)
+    fun resetResult() {
+        updateQRCodeResult(newValue = "")
+    }
+}
 
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                updateQRCodeResult(newValue = "")
-                updateQRCodeResult(newValue = barcode.rawValue ?: "")
-            }
-            .addOnFailureListener {
-                updateQRCodeResult(newValue = "")
-                makeNotification(
-                    title = NOTIFICATION_TITLE_SCAN_FAILED,
-                    body = NOTIFICATION_BODY_SCAN_FAILED,
-                    notificationId = NOTIFICATION_ID_SCAN_FAILED,
-                    context = context
+class QRCodeAnalyzer(
+    private val onQRCodeDetected: (String) -> Unit,
+    private val onScanFailed: () -> Unit,
+) : ImageAnalysis.Analyzer {
+
+    private val scannerOptions = BarcodeScannerOptions
+        .Builder()
+        .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+        .build()
+    private val scanner = BarcodeScanning.getClient(scannerOptions)
+
+    @OptIn(ExperimentalGetImage::class)
+    override fun analyze(imageProxy: ImageProxy) {
+        val mediaImage: Image? = imageProxy.image
+        if (mediaImage != null) {
+            val image: InputImage = InputImage
+                .fromMediaImage(
+                    mediaImage,
+                    imageProxy.imageInfo.rotationDegrees
                 )
-            }
+
+            scanner.process(image)
+                .addOnSuccessListener { barcodes ->
+                    if (barcodes.isNotEmpty())
+                        onQRCodeDetected(barcodes[0].rawValue ?: "")
+                }
+                .addOnFailureListener {
+                    onScanFailed()
+                }
+                .addOnCompleteListener {
+                    imageProxy.close()
+                }
+        }
     }
 }

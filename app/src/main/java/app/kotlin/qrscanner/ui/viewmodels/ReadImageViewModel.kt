@@ -8,7 +8,9 @@ import app.kotlin.qrscanner.NOTIFICATION_ID_READ_FAILED
 import app.kotlin.qrscanner.NOTIFICATION_TITLE_READ_FAILED
 import app.kotlin.qrscanner.workers.makeNotification
 import com.google.mlkit.vision.barcode.BarcodeScanner
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.update
 
 data class ReadImageUiState(
     val pickedImage: Uri? = null,
+    val keyPickingImageEvent: Boolean = false,
     val barcodeResult: String = "",
     val autoCopy: Boolean = false,
     val autoOpenWeblink: Boolean = false
@@ -42,6 +45,7 @@ class ReadImageViewModel : ViewModel() {
         }
     }
 
+
     fun updateAutoOpenWebState() {
         _uiState.update { currentState ->
             currentState.copy(autoOpenWeblink = !currentState.autoOpenWeblink)
@@ -50,8 +54,21 @@ class ReadImageViewModel : ViewModel() {
 
     fun updatePickedImage(newUri: Uri?) {
         _uiState.update { currentState ->
+            currentState.copy(pickedImage = newUri)
+        }
+    }
+
+    private fun recordPickingImageEvent() {
+        _uiState.update { currentState ->
+            currentState.copy(keyPickingImageEvent = !currentState.keyPickingImageEvent)
+        }
+    }
+
+    fun resetResult() {
+        _uiState.update { currentState ->
             currentState.copy(
-                pickedImage = newUri
+                pickedImage = null,
+                barcodeResult = ""
             )
         }
     }
@@ -59,15 +76,19 @@ class ReadImageViewModel : ViewModel() {
     fun analyzeImage(context: Context) {
         val currentUri: Uri? = _uiState.value.pickedImage
         val inputImage: InputImage? = currentUri?.let { InputImage.fromFilePath(context, it) }
-        val scanner: BarcodeScanner = BarcodeScanning.getClient()
+        val barcodeScanningOptions: BarcodeScannerOptions = BarcodeScannerOptions
+            .Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .build()
+        val scanner: BarcodeScanner = BarcodeScanning.getClient(barcodeScanningOptions)
 
         if (inputImage != null) {
             try {
                 scanner.process(inputImage)
                     .addOnSuccessListener { barcodes ->
                         if (barcodes.isNotEmpty()) {
-                            updateQRCodeResult(newValue = "")
                             updateQRCodeResult(newValue = barcodes[0].rawValue ?: "")
+                            recordPickingImageEvent()
                         } else {
                             updateQRCodeResult(newValue = "")
                             makeNotification(
@@ -76,6 +97,7 @@ class ReadImageViewModel : ViewModel() {
                                 notificationId = NOTIFICATION_ID_READ_FAILED,
                                 context = context
                             )
+                            recordPickingImageEvent()
                         }
                     }
                     .addOnFailureListener {

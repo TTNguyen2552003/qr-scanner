@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 
 data class CreateQRUiState(
     val textInput: String = "",
-    val qrCodeResult: Bitmap? = null
+    val qrCodeResult: Bitmap? = null,
 )
 
 class CreateQRViewModel(
@@ -36,7 +36,7 @@ class CreateQRViewModel(
     private val debounceDelay: Long = 250
 
     init {
-        resetState()
+        _uiState.value = CreateQRUiState()
     }
 
     private fun updateQRCodeResult(textInput: String) {
@@ -69,12 +69,7 @@ class CreateQRViewModel(
 
     fun saveQRCode() {
         val currentTextInput: String = _uiState.value.textInput
-        resetState()
         backgroundWorkQRScannerRepository.saveQRCode(textInput = currentTextInput)
-    }
-
-    private fun resetState() {
-        _uiState.value = CreateQRUiState()
     }
 
     companion object {
